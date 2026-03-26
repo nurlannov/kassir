@@ -12,13 +12,10 @@
         body { font-family: -apple-system, sans-serif; background: #000; color: #fff; height: 100vh; overflow: hidden; }
         .app { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; }
         
-        /* Верхняя панель (с фонариком) */
         .top-bar { height: 56px; background: #020617; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; border-bottom: 1px solid #1f2937; z-index: 10; }
-        .top-bar-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; flex: 1; text-align: center; margin: 0 10px; }
-        .back-icon, .flash-icon { font-size: 20px; color: #fff; text-decoration: none; cursor: pointer; width: 24px; display: flex; align-items: center; justify-content: center;}
-        .flash-icon { font-size: 18px; }
+        .top-bar-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; flex: 1; text-align: center; }
+        .back-icon, .flash-icon { font-size: 20px; color: #fff; text-decoration: none; width: 24px; display: flex; align-items: center; justify-content: center;}
 
-        /* Окно камеры */
         .camera-wrapper { position: relative; flex: 1; background: #000; overflow: hidden; }
         video { width: 100%; height: 100%; object-fit: cover; }
 
@@ -32,100 +29,68 @@
             50% { transform: translateY(120px); }
         }
 
-        /* --- НОВЫЙ БАННЕР "БИЛЕТ ПРОЙДЕН" (КАК НА СКРИНШОТЕ) --- */
+        /* --- ОБНОВЛЕННЫЙ МИНИМАЛИСТИЧНЫЙ БАННЕР --- */
         #ticketBanner {
-            display: none; /* Скрыт по умолчанию */
+            display: none;
             position: absolute;
-            top: 70px; /* Сдвинут чуть ниже верхней панели */
+            top: 70px;
             left: 16px; 
             right: 16px;
-            
-            /* Стили фигуры как на скриншоте */
             background: #fff;
-            color: #111827;
-            border-radius: 8px; /* Скругленные углы */
+            border-radius: 8px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.4);
             z-index: 100;
-            overflow: hidden; /* Чтобы зеленая полоса не вылезала */
-            
-            /* Анимация плавного появления */
+            overflow: hidden;
             animation: slideIn 0.3s ease-out;
         }
 
-        /* Зеленая полоса слева (акцент) */
         #ticketBanner::before {
             content: '';
             position: absolute;
             left: 0; top: 0; bottom: 0;
-            width: 8px; /* Ширина зеленой полоски */
-            background: #22c55e; /* Насыщенный зеленый */
+            width: 8px;
+            background: #22c55e; 
         }
 
-        /* Контент внутри баннера */
         .banner-content {
-            padding: 18px 18px 18px 24px; /* Учитываем зеленую полосу */
+            padding: 20px; /* Увеличил отступ для центровки */
             display: flex;
             align-items: center;
-            gap: 12px; /* Расстояние между иконкой и текстом */
+            justify-content: center; /* Центрируем текст */
         }
 
-        /* Иконка (зеленый чекбокс) */
-        .banner-icon {
-            font-size: 22px;
-            color: #22c55e;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Текст внутри баннера */
-        .banner-text-block {
-            display: flex;
-            flex-direction: column;
-        }
-        .banner-status {
-            font-size: 15px;
-            font-weight: 700;
-            color: #22c55e;
-            margin-bottom: 2px;
-        }
         .banner-title {
-            font-size: 15px;
-            font-weight: 600;
+            font-size: 16px;
+            font-weight: 700;
             color: #111827;
+            text-transform: uppercase; /* Делаем надпись чуть строже */
+            letter-spacing: 0.5px;
         }
 
-        /* Анимация появления */
         @keyframes slideIn {
-            from { transform: translateY(-30px) scale(0.95); opacity: 0; }
-            to { transform: translateY(0) scale(1); opacity: 1; }
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
-        /* --- КОНЕЦ СТИЛЕЙ БАННЕРА --- */
 
         .bottom-bar { height: 80px; background: #020617; display: flex; align-items: center; padding: 0 16px 20px; border-top: 1px solid #1f2937; }
-        .manual-btn { width: 100%; border-radius: 12px; border: none; background: #1f2937; color: #fff; padding: 14px; font-weight: 600; font-size: 14px; cursor: pointer; }
+        .manual-btn { width: 100%; border-radius: 12px; border: none; background: #1f2937; color: #fff; padding: 14px; font-weight: 600; font-size: 14px; }
     </style>
 </head>
-<body onclick="unlockAudio()"> <div class="app">
+<body onclick="unlockAudio()">
+
+<div class="app">
     <div class="top-bar">
-        <a href="#" class="back-icon">‹</a>
-        <div class="top-bar-title">СКАНИРУЙТЕ (QR ИЛИ BAR)-КОД БИЛЕТА</div>
+        <div class="back-icon">‹</div>
+        <div class="top-bar-title">СКАНИРОВАНИЕ БИЛЕТА</div>
         <div class="flash-icon">🔦</div>
     </div>
 
     <div id="ticketBanner">
         <div class="banner-content">
-            <div class="banner-icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill="currentColor"/>
-                </svg>
-            </div>
-            <div class="banner-text-block">
-                <span class="banner-status">Успешно</span>
-                <span class="banner-title">БИЛЕТ ПРОЙДЕН</span>
-            </div>
+            <span class="banner-title">БИЛЕТ ПРОЙДЕН</span>
         </div>
     </div>
+
     <div class="camera-wrapper">
         <video id="video" autoplay playsinline></video>
         <div class="scan-line"></div>
@@ -137,22 +102,19 @@
 </div>
 
 <script>
-    // --- ТВОЙ ОРИГИНАЛЬНЫЙ JS КОД (ЛОГИКА НЕ МЕНЯЛАСЬ) ---
     const video = document.getElementById('video');
     const banner = document.getElementById('ticketBanner');
     const beepSound = new Audio('https://www.myinstants.com/media/sounds/iphone-apple-store-sound.mp3');
     
     let isAudioUnlocked = false;
 
-    // Функция для Safari: разблокирует звук при первом тапе по экрану
     function unlockAudio() {
         if (!isAudioUnlocked) {
             beepSound.play().then(() => {
                 beepSound.pause();
                 beepSound.currentTime = 0;
                 isAudioUnlocked = true;
-                console.log("Звук разблокирован для Safari");
-            }).catch(e => console.log("Ждем реального клика..."));
+            }).catch(() => {});
         }
     }
 
@@ -170,7 +132,7 @@
             video.play();
             requestAnimationFrame(tick);
         } catch (err) {
-            alert("Нужен доступ к камере и HTTPS");
+            console.error(err);
         }
     }
 
@@ -191,14 +153,11 @@
     }
 
     function onTicketDetected() {
-        // Твоя логика звука
         beepSound.currentTime = 0;
-        beepSound.play().catch(e => console.log("Кликни по экрану один раз!"));
+        beepSound.play().catch(() => {});
 
-        // Твоя логика баннера: показываем через display: block
         banner.style.display = 'block';
 
-        // Прячем обратно через 2 секунды
         setTimeout(() => {
             banner.style.display = 'none';
         }, 2000);
