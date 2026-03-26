@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <title>Сканер билетов</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#020617">
+
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+            background: #000;
+            color: #fff;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .app { position: relative; width: 100%; height: 100%; background: #111827; display: flex; flex-direction: column; }
+        
+        .top-bar {
+            height: 56px;
+            background: #020617;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 10;
+        }
+        .top-bar-title { flex: 1; font-size: 13px; font-weight: 600; text-transform: uppercase; text-align: center; letter-spacing: 0.5px; }
+
+        .camera-wrapper { position: relative; flex: 1; background: #000; overflow: hidden; }
+        video { width: 100%; height: 100%; object-fit: cover; }
+
+        .scan-line {
+            position: absolute;
+            left: 0; right: 0; top: 50%;
+            height: 2px;
+            background: #facc15;
+            box-shadow: 0 0 15px #facc15;
+            animation: scan 2s infinite ease-in-out;
+        }
+        @keyframes scan {
+            0%, 100% { transform: translateY(-100px); }
+            50% { transform: translateY(100px); }
+        }
+
+        .bottom-bar { height: 80px; background: #020617; display: flex; align-items: center; padding: 0 16px 20px; }
+        .manual-btn {
+            width: 100%; border-radius: 12px; border: none; background: #1f2937;
+            color: #e5e7eb; padding: 14px; font-size: 15px; font-weight: 600;
+        }
+
+        .ticket-banner {
+            position: absolute; top: 56px; left: 0; right: 0;
+            background: #16a34a; color: #fff; text-align: center;
+            padding: 15px; font-weight: 700; transform: translateY(-100%);
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 20;
+        }
+        .ticket-banner.visible { transform: translateY(0); }
+    </style>
+</head>
+<body>
+
+<div class="app">
+    <div class="top-bar">
+        <div class="top-bar-title">СКАНИРОВАНИЕ БИЛЕТА</div>
+    </div>
+
+    <div class="ticket-banner" id="ticketBanner">БИЛЕТ НАЙДЕН</div>
+
+    <div class="camera-wrapper">
+        <video id="video" autoplay playsinline></video>
+        <div class="scan-line"></div>
+    </div>
+
+    <div class="bottom-bar">
+        <button class="manual-btn">Ввести вручную</button>
+    </div>
+</div>
+
+<script>
+    const video = document.getElementById('video');
+    const banner = document.getElementById('ticketBanner');
+    const beepSound = new Audio('https://www.myinstants.com/media/sounds/iphone-apple-store-sound.mp3');
+    
+    // Оптимизация: создаем канвас один раз
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    
+    let lastScanTime = 0;
+
+    async function startCamera() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'environment', width: { ideal: 1280 } },
+                audio: false
+            });
+            video.srcObject = stream;
+            video.setAttribute("playsinline", true);
+            video.play();
+            requestAnimationFrame(tick);
+        } catch (err) {
+            alert('Ошибка камеры. Убедитесь, что используете HTTPS');
+        }
+    }
+
+    function tick() {
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+            if (code && Date.now() - lastScanTime > 3000) {
+                lastScanTime = Date.now();
+                onFound(code.data);
+            }
+        }
+        // Задержка 100мс, чтобы не перегружать процессор
+        setTimeout(() => requestAnimationFrame(tick), 100);
+    }
+
+    function onFound(data) {
+        beepSound.play().catch(() => {});
+        banner.classList.add('visible');
+        setTimeout(() => banner.classList.remove('visible'), 2000);
+        console.log("QR Данные:", data);
+    }
+
+    // Регистрация Service Worker для PWA
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js');
+    }
+
+    startCamera();
+</script>
+</body>
+</html>
